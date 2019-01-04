@@ -39,6 +39,8 @@ class PBFile(object):
         return [ProtoPorperty]
         '''
         propertyCodeList = propertyString.splitlines()
+        for protoCode in propertyCodeList:
+            print(protoCode)
 
     def getProtoTypeList(self,protoFilePath):
         '''
@@ -58,9 +60,6 @@ class PBFile(object):
         for pbClass in self.classList:
             className = pbClass.typeName
             pbClass.propertyList = self.getPropertyListWithCode(classCodeDic[className])
-
-
-        
 
 obj = PBFile()
 obj.getProtoTypeList('/Users/liuyudi/PKGame/Foreign/proto-hago-ktv-api-biz/ktvapibiz.proto')
