@@ -9,15 +9,11 @@ class PBFile(object):
         self.classList = None
         self.baseClassList = {'int32':ProtoType('int32'),'string':ProtoType('string'),'int64':ProtoType('int64'),'uint64':ProtoType('uint64'),'uint32':ProtoType('uint32')}
 
-    def getProtoAllMessageString(self,fileContentString):
-        data = re.compile(r'(message\s\w+\s*\{((?!message\s).)*\})',re.S)
+    def getProtoAllTypeString(self,fileContentString,typeName):
+        reString = '('+typeName+r'\s\w+\s*\{.*?\})'
+        data = re.compile(reString,re.S)
         result = data.findall(fileContentString)
-        codeStringList = []
-        for mate in result:
-            for string in mate:
-                if string != '\n':
-                    codeStringList.append(string)
-        return codeStringList
+        return result
 
     def getClassNameWithCode(self,codeString):
         '''
@@ -49,7 +45,15 @@ class PBFile(object):
         protoFile = open(protoFilePath)
         protoFileString = protoFile.read()
         protoFile.close()
-        allMessageString = self.getProtoAllMessageString(protoFileString)
+
+        # 找到所有的枚举类型并清除掉
+        allEnumString = self.getProtoAllTypeString(protoFileString,'enum')
+        for enumString in allEnumString:
+            protoFileString = protoFileString.replace(enumString,'')
+        print(protoFileString)
+
+        # 找到所有的message类型
+        allMessageString = self.getProtoAllTypeString(protoFileString,'message')
         typeList = []
         classCodeDic = {}
         for codeString in allMessageString:

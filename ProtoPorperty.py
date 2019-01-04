@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 class ProtoPorperty(object):
-    def __init__(objectName:str,objectType,isRepeat = False):
+    def __init__(self,objectName:str,objectType,isRepeat = False):
         self.objectName = objectName
         self.objectType = objectType
         self.isRepeat = isRepeat
