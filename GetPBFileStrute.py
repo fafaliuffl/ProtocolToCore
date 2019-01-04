@@ -6,7 +6,8 @@ from ProtoType import ProtoType
 
 class PBFile(object):
     def __init__(self):
-        self.classList = []
+        self.classList = None
+        self.baseClassList = {'int32':ProtoType('int32'),'string':ProtoType('string'),'int64':ProtoType('int64'),'uint64':ProtoType('uint64'),'uint32':ProtoType('uint32')}
 
     def getProtoAllMessageString(self,fileContentString):
         data = re.compile(r'(message\s\w+\s*\{((?!message).)*\})',re.S)
@@ -33,6 +34,11 @@ class PBFile(object):
             print('group = '+ group + '\n')
             print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n')
         return stringGroup[1]
+    def getPropertyListWithCode(self,propertyString):
+        '''
+        return [ProtoPorperty]
+        '''
+        propertyCodeList = propertyString.splitlines()
 
     def getProtoTypeList(self,protoFilePath):
         '''
@@ -40,13 +46,21 @@ class PBFile(object):
         '''
         protoFile = open(protoFilePath)
         protoFileString = protoFile.read()
-        allMessageString = self.getProtoAllMessageString(protoFileString)
         protoFile.close()
+        allMessageString = self.getProtoAllMessageString(protoFileString)
         typeList = []
+        classCodeDic = {}
         for codeString in allMessageString:
             aType = ProtoType(self.getClassNameWithCode(codeString))
             typeList.append(aType)
-        print(typeList)
+            classCodeDic[aType.typeName] = codeString
+        self.classList = typeList
+        for pbClass in self.classList:
+            className = pbClass.typeName
+            pbClass.propertyList = self.getPropertyListWithCode(classCodeDic[className])
+
+
+        
 
 obj = PBFile()
 obj.getProtoTypeList('/Users/liuyudi/PKGame/Foreign/proto-hago-ktv-api-biz/ktvapibiz.proto')

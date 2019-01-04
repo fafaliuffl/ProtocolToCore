@@ -6,3 +6,5 @@ class ProtoPorperty(object):
         self.objectName = objectName
         self.objectType = objectType
         self.isRepeat = isRepeat
+
+        
