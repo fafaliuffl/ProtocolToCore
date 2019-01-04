@@ -10,7 +10,7 @@ class PBFile(object):
         self.baseClassList = {'int32':ProtoType('int32'),'string':ProtoType('string'),'int64':ProtoType('int64'),'uint64':ProtoType('uint64'),'uint32':ProtoType('uint32')}
 
     def getProtoAllMessageString(self,fileContentString):
-        data = re.compile(r'(message\s\w+\s*\{((?!message).)*\})',re.S)
+        data = re.compile(r'(message\s\w+\s*\{((?!message\s).)*\})',re.S)
         result = data.findall(fileContentString)
         codeStringList = []
         for mate in result:
