@@ -3,11 +3,12 @@
 
 import re
 from ProtoType import ProtoType
+from ProtoPorperty import ProtoPorperty
 
 class PBFile(object):
     def __init__(self):
         self.classList = None
-        self.baseClassList = {'int32':ProtoType('int32'),'string':ProtoType('string'),'int64':ProtoType('int64'),'uint64':ProtoType('uint64'),'uint32':ProtoType('uint32')}
+        self.baseClassList = [ProtoType('int32'),ProtoType('string'),ProtoType('int64'),ProtoType('uint64'),ProtoType('uint32')]
 
     def getProtoAllTypeString(self,fileContentString,typeName):
         reString = '('+typeName+r'\s\w+\s*\{.*?\})'
@@ -30,13 +31,38 @@ class PBFile(object):
             print('group = '+ group + '\n')
             print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n')
         return stringGroup[1]
-    def getPropertyListWithCode(self,propertyString):
+    def getPropertyListWithCode(self,propertyString,classList):
         '''
         return [ProtoPorperty]
         '''
+        propertyList = []
         propertyCodeList = propertyString.splitlines()
-        for protoCode in propertyCodeList:
-            print(protoCode)
+        propertyCodeList = propertyCodeList[1:-1]
+        for codeString in propertyCodeList:
+            codeList = codeString.split()
+            if len(codeList) == 0:
+                continue
+            if codeList[0] != 'message':
+                if codeList[0] == 'repeated':
+                    codeList = codeList[1:]
+                findClass = False
+                for classType in classList:
+                    if codeList[0] == classType.typeName:
+                        protoPorpertyObj = ProtoPorperty(codeList[1],classType)
+                        if codeList[0] == 'repeated':
+                            protoPorpertyObj.isRepeat = True
+                        propertyList.append(protoPorpertyObj)
+                        findClass = True
+                        break
+                if findClass == False:
+                    protoPorpertyObj = ProtoPorperty(codeList[1],ProtoType(codeList[0]))
+                    if codeList[0] == 'repeated':
+                        protoPorpertyObj.isRepeat = True
+                    propertyList.append(protoPorpertyObj)
+                    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n')
+                    print('找不到类型'+codeList[0]+'已自动生成类型❗❗️❗️❗️❗️\n')
+                    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n')
+        return propertyList
 
     def getProtoTypeList(self,protoFilePath):
         '''
@@ -50,7 +76,6 @@ class PBFile(object):
         allEnumString = self.getProtoAllTypeString(protoFileString,'enum')
         for enumString in allEnumString:
             protoFileString = protoFileString.replace(enumString,'')
-        print(protoFileString)
 
         # 找到所有的message类型
         allMessageString = self.getProtoAllTypeString(protoFileString,'message')
@@ -63,7 +88,8 @@ class PBFile(object):
         self.classList = typeList
         for pbClass in self.classList:
             className = pbClass.typeName
-            pbClass.propertyList = self.getPropertyListWithCode(classCodeDic[className])
+            pbClass.propertyList = self.getPropertyListWithCode(classCodeDic[className],typeList+self.baseClassList)
+        
 
 obj = PBFile()
 obj.getProtoTypeList('/Users/liuyudi/PKGame/Foreign/proto-hago-ktv-api-biz/ktvapibiz.proto')
